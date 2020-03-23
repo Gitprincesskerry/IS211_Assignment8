@@ -1,11 +1,29 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
-# This is Kerry Rainford's Week 7 Assignment
+# This is Kerry Rainford's Week 8 Assignment
 
 import random
 import time
 
-class PigGame():
+class MyTimer():
+    def __init__(self):
+        self.starttime = time.time()
+
+    def elaspsedtime(self):
+        currenttime = time.time()
+        difference = currenttime - self.starttime
+        return difference
+
+class PlayStep:
+    def __init__(self):
+        pass
+    def step():
+        pass
+
+class TimedGameProxy():
+    pass
+
+class Game():
     def __init__(self):
         self.player1 = None
         self.player2 = None
@@ -19,13 +37,16 @@ class PigGame():
         reply = raw_input()
         reply = reply.lower()
         self.player2 = playerfactory.playerselection(reply)
+        self.timer = MyTimer()
 
     def game(self):
-        dice = OneDie() #initialize die class
+        dice = OneDie()
+        whoseturn = '1'
+        currentplayer = self.player1
         while self.player1.score < 100 and self.player2.score < 100:
             tempscore = 0
             hold = False
-            print("\n\n It's now player 1's turn! \n\n")
+            print("\n\n It's now player %s's turn! \n\n" %(whoseturn))
             while hold == False:
                 dice.onedieroll()
                 if dice.value == 1:
@@ -34,40 +55,22 @@ class PigGame():
                 else:
                     tempscore = tempscore + dice.value
                     print("You have rolled %d, you currently have %d points. Would you like to roll or hold? (type r for roll and h for hold)." %(dice.value, tempscore))
-                    reply = self.player1.decide(tempscore)
+                    reply = currentplayer.decisionstep(tempscore)
 
                     if reply == 'h':
-                        self.player1.score = self.player1.score + tempscore
-                        print("Player 1 has %d points " %self.player1.score)
+                        currentplayer.score = currentplayer.score + tempscore
+                        print("Player %s has %d points " %(whoseturn, currentplayer.score))
                         hold = True
-                    if self.player1.score + tempscore >= 100:
-                        self.player1.score = self.player1.score + tempscore
-                        hold = True
-                        print("Your score is greater than or equal to 100.")
-
-            tempscore = 0
-            hold = False
-            print("\n\n It's now player 2's turn! \n\n")
-            while hold == False:
-                dice.onedieroll()
-                if dice.value == 1:
-                    print("Sorry, you have rolled a 1, next players turn. ")
-                    hold = True
-                else:
-                    tempscore = tempscore + dice.value
-                    print("You have rolled %d, you currently have %d points. Would you like to roll or hold? (type r for roll and h for hold)." %(dice.value, tempscore))
-                    # reply = raw_input()
-                    # reply = reply.lower()
-                    reply = self.player2.decide(tempscore)
-
-                    if reply == 'h':
-                        self.player2.score = self.player2.score + tempscore
-                        print("Player 2 has %d points " %self.player2.score)
-                        hold = True
-                    if self.player2.score + tempscore >= 100:
-                        self.player2.score = self.player2.score + tempscore
+                    if currentplayer.score + tempscore >= 100:
+                        currentplayer.score = currentplayer.score + tempscore
                         hold = True
                         print("Your score is greater than or equal to 100.")
+            if whoseturn == '1':
+                whoseturn = '2'
+                currentplayer = self.player2
+            else:
+                whoseturn = '1'
+                currentplayer = self.player1
 
         if self.player1.score> self.player2.score:
             print("Player 1, Has Won. Congratulations!!! ")
@@ -79,7 +82,7 @@ class PigGame():
 class Player(object):
     def __init__(self):
         self.score = 0
-    def decide(self, tempscore):
+    def decisionstep(self, tempscore):
         reply = raw_input()
         reply = reply.lower()
         return reply
@@ -90,7 +93,7 @@ class Player(object):
 class ComputerPlayer(Player):
     def __init__(self):
         self.score = 0
-    def decide(self, tempscore):
+    def decisionstep(self, tempscore):
         if tempscore >= 25:
             reply = "h"
         else:
@@ -124,5 +127,5 @@ class PlayerFactory():
         return player
 
 if __name__ == "__main__":
-    x = PigGame()
+    x = Game()
     x.game()
