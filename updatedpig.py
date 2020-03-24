@@ -17,33 +17,36 @@ class MyTimer():
 class PlayStep:
     def __init__(self):
         pass
-    def step():
+    def step(self, Player, temp):
         pass
 
-class TimedGameProxy():
-    pass
-
-class Game():
+class Game(PlayStep):
     def __init__(self):
+        super().__init__()
         self.player1 = None
         self.player2 = None
         playerfactory = PlayerFactory()
         print("Would you like player 1 to be a computer or human? Enter c for computer or h for human.")
-        reply = raw_input()
+        reply = input()
         reply = reply.lower()
         self.player1 = playerfactory.playerselection(reply)
 
         print("Would you like player 2 to be a computer or human? Enter c for computer or h for human.")
-        reply = raw_input()
+        reply = input()
         reply = reply.lower()
         self.player2 = playerfactory.playerselection(reply)
         self.timer = MyTimer()
+
+    def step(self, currentplayer, tempscore):
+        reply = currentplayer.decisionstep(tempscore)
+        return reply
 
     def game(self):
         dice = OneDie()
         whoseturn = '1'
         currentplayer = self.player1
-        while self.player1.score < 100 and self.player2.score < 100:
+        reply = 'n'
+        while (self.player1.score < 100 and self.player2.score < 100) and reply != 't':
             tempscore = 0
             hold = False
             print("\n\n It's now player %s's turn! \n\n" %(whoseturn))
@@ -55,16 +58,23 @@ class Game():
                 else:
                     tempscore = tempscore + dice.value
                     print("You have rolled %d, you currently have %d points. Would you like to roll or hold? (type r for roll and h for hold)." %(dice.value, tempscore))
-                    reply = currentplayer.decisionstep(tempscore)
+                    reply = self.step(currentplayer, tempscore)
 
                     if reply == 'h':
                         currentplayer.score = currentplayer.score + tempscore
                         print("Player %s has %d points " %(whoseturn, currentplayer.score))
                         hold = True
-                    if currentplayer.score + tempscore >= 100:
-                        currentplayer.score = currentplayer.score + tempscore
+                        if currentplayer.score >= 100:
+                            hold = True
+                            print("Your score is greater than or equal to 100.")
+                    else:
+                        if currentplayer.score + tempscore >= 100:
+                            currentplayer.score = currentplayer.score + tempscore
+                            hold = True
+                            print("Your score is greater than or equal to 100.")
+                    if reply == 't':
                         hold = True
-                        print("Your score is greater than or equal to 100.")
+
             if whoseturn == '1':
                 whoseturn = '2'
                 currentplayer = self.player2
@@ -79,15 +89,30 @@ class Game():
         else:
             print("Congratulations to you both!!!")
 
+class TimedGameProxy(Game):
+    def __init__(self):
+        super().__init__()
+        #self.game = Game()
+        #self.timer = MyTimer()
+        #self.game.game()
+
+    def step(self, currentplayer, tempscore):
+        reply = super().step(currentplayer, tempscore)
+        difference = self.timer.elaspsedtime()
+        print("Time elaspsed " + str(difference))
+        if difference > 60:
+            return 't'
+        return reply
+
 class Player(object):
     def __init__(self):
         self.score = 0
     def decisionstep(self, tempscore):
-        reply = raw_input()
+        reply = input()
         reply = reply.lower()
         return reply
 
-    def output_score():
+    def output_score(self):
         return self.score
 
 class ComputerPlayer(Player):
@@ -127,5 +152,5 @@ class PlayerFactory():
         return player
 
 if __name__ == "__main__":
-    x = Game()
+    x = TimedGameProxy()
     x.game()
